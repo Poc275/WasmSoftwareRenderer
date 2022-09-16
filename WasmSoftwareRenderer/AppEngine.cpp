@@ -1,10 +1,12 @@
 #include <SDL.h>
 #include <stdio.h>
+#include <cmath>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #endif // _EMSCRIPTEN__
 #include "Vertex.h"
+#include "Matrix2D.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -33,7 +35,7 @@ void run_main_loop()
 int main(int argc, char** argv)
 {
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_CreateWindowAndRenderer(500, 500, 0, &window, &renderer);
+	SDL_CreateWindowAndRenderer(800, 800, 0, &window, &renderer);
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x80, 0x00, 0xFF);
 
@@ -58,6 +60,131 @@ int main(int argc, char** argv)
 	SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
 	SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
 	SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+
+	// translate the square
+	//Matrix2D translate = Matrix2D(1, 0, 10, 0, 1, 10, 0, 0, 1);
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	verts[i] = translate * verts[i];
+	//}
+
+	// redraw
+	//SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+
+	// scale the square
+	//Matrix2D scale = Matrix2D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1);
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	verts[i] = scale * verts[i];
+	//}
+
+	// redraw
+	//SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+
+	// rotate the square
+	//Matrix2D rotation = Matrix2D(cos(0.2f), sin(0.2f) * -1.0f, 0, sin(0.2f), cos(0.2f), 0, 0, 0, 1);
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	verts[i] = rotation * verts[i];
+	//}
+
+	// redraw
+	//SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+	//SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+
+	// scale about a point (top left corner of square)
+	//Matrix2D loopScale = Matrix2D(1.2f, 0, 0,
+	//							  0, 1.2f, 0,
+	//							  0, 0, 1);
+
+	//Matrix2D moveToOrigin = Matrix2D(1.0f, 0.0f, -200.0f,
+	//								 0.0f, 1.0f, -200.0f,
+	//								 0.0f, 0.0f, 1.0f);
+	//
+	//Matrix2D moveBack = Matrix2D(1.0f, 0.0f, 200.0f,
+	//							 0.0f, 1.0f, 200.0f,
+	//							 0.0f, 0.0f, 1.0f);
+
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	for (int i = 0; i < 4; i++)
+	//	{
+	//		verts[i] = moveBack * loopScale * moveToOrigin * verts[i];
+	//	}
+
+
+	//	SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+	//}
+
+	// rotate about a point (top left corner of square)
+	//Matrix2D loopRotate = Matrix2D(cos(0.25f), -sin(0.25f), 0,
+	//							   sin(0.25f), cos(0.25f), 0,
+	//							   0, 0, 1.0f);
+
+	//Matrix2D moveToOrigin = Matrix2D(1.0f, 0.0f, -200.0f,
+	//								 0.0f, 1.0f, -200.0f,
+	//								 0.0f, 0.0f, 1.0f);
+
+	//Matrix2D moveBack = Matrix2D(1.0f, 0.0f, 200.0f,
+	//							 0.0f, 1.0f, 200.0f,
+	//							 0.0f, 0.0f, 1.0f);
+
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	for (int i = 0; i < 4; i++)
+	//	{
+	//		verts[i] = moveBack * loopRotate * moveToOrigin * verts[i];
+	//	}
+
+
+	//	SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+	//	SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+	//}
+
+	// scale and rotate about a point (top left corner of square)
+	Matrix2D loopRotate = Matrix2D(cos(0.25f), -sin(0.25f), 0,
+		sin(0.25f), cos(0.25f), 0,
+		0, 0, 1.0f);
+
+	Matrix2D loopScale = Matrix2D(1.05f, 0, 0,
+								  0, 1.05f, 0,
+								  0, 0, 1.0f);
+
+	Matrix2D moveToOrigin = Matrix2D(1.0f, 0.0f, -200.0f,
+		0.0f, 1.0f, -200.0f,
+		0.0f, 0.0f, 1.0f);
+
+	Matrix2D moveBack = Matrix2D(1.0f, 0.0f, 200.0f,
+		0.0f, 1.0f, 200.0f,
+		0.0f, 0.0f, 1.0f);
+
+	for (int i = 0; i < 20; i++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			verts[i] = moveBack * loopRotate * loopScale * moveToOrigin * verts[i];
+		}
+
+
+		SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
+		SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
+		SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
+		SDL_RenderDrawLineF(renderer, verts[3].GetX(), verts[3].GetY(), verts[0].GetX(), verts[0].GetY());
+	}
+
 
 	SDL_RenderPresent(renderer);
 
