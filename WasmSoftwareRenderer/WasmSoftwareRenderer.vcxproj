@@ -140,12 +140,12 @@
   <ItemGroup>
     <ClCompile Include="AppEngine.cpp" />
     <ClCompile Include="Coordinate.cpp" />
-    <ClCompile Include="Matrix2D.cpp" />
+    <ClCompile Include="Matrix3D.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coordinate.h" />
-    <ClInclude Include="Matrix2D.h" />
+    <ClInclude Include="Matrix3D.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
