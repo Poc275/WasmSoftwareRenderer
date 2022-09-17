@@ -13,6 +13,7 @@ Vertex::Vertex(const Vertex& v)
 // Destructor
 Vertex::~Vertex(void) {}
 
+// Operator overloads
 Vertex& Vertex::operator=(const Vertex& rhs)
 {
 	if (this != &rhs)
@@ -21,6 +22,22 @@ Vertex& Vertex::operator=(const Vertex& rhs)
 		// remember that a = b is the same as a.operator=(b)
 		Copy(rhs);
 	}
+	return *this;
+}
+
+// Public methods
+Vertex& Vertex::DehomogenizeVertex()
+{
+	float dhX = this->GetX() / this->GetW();
+	float dhY = this->GetY() / this->GetW();
+	float dhZ = this->GetZ() / this->GetW();
+	float dhW = this->GetW() / this->GetW();
+
+	this->SetX(dhX);
+	this->SetY(dhY);
+	this->SetZ(dhZ);
+	this->SetW(dhW);
+
 	return *this;
 }
 

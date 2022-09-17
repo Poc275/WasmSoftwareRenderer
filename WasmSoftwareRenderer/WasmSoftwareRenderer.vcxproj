@@ -139,13 +139,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppEngine.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="Matrix3D.cpp" />
+    <ClCompile Include="MD2Loader.cpp" />
+    <ClCompile Include="Model3D.cpp" />
+    <ClCompile Include="Polygon3D.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="Matrix3D.h" />
+    <ClInclude Include="MD2Loader.h" />
+    <ClInclude Include="Model3D.h" />
+    <ClInclude Include="Polygon3D.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

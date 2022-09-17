@@ -11,6 +11,8 @@ public:
 
 	Vertex& operator= (const Vertex& rhs);
 
+	Vertex& DehomogenizeVertex();
+
 private:
 	void Copy(const Vertex& v);
 };
