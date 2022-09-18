@@ -1,3 +1,4 @@
+#include <SDL.h>
 #include "Polygon3D.h"
 
 // Constructors
@@ -10,7 +11,7 @@ Polygon3D::Polygon3D(void)
 
 	_isBackFacing = false;
 	_averageZDepth = 0.0f;
-
+	_lightingColour = SDL_Color{ 0, 0, 0, 255 };
 	_normal = Vector3D();
 }
 
@@ -21,7 +22,7 @@ Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
 	_vertIndex[2] = indexThree;
 	_isBackFacing = false;
 	_averageZDepth = 0.0f;
-
+	_lightingColour = SDL_Color{ 0, 0, 0, 255 };
 	_normal = Vector3D();
 }
 
@@ -59,6 +60,26 @@ void Polygon3D::SetPolygonNormal(const Vector3D& normal)
 	_normal = normal;
 }
 
+float Polygon3D::GetAverageZDepth(void) const
+{
+	return _averageZDepth;
+}
+
+void Polygon3D::SetAverageZDepth(float averageZ)
+{
+	_averageZDepth = averageZ;
+}
+
+SDL_Color Polygon3D::GetLightingColour(void) const
+{
+	return _lightingColour;
+}
+
+void Polygon3D::SetLightingColour(const SDL_Color& color)
+{
+	_lightingColour = color;
+}
+
 // Public methods
 void Polygon3D::SetBackFacing(bool backwards)
 {
@@ -86,16 +107,6 @@ bool Polygon3D::DrawPolygon(void) const
 	}
 }
 
-inline float Polygon3D::GetAverageZDepth(void) const
-{
-	return _averageZDepth;
-}
-
-void Polygon3D::SetAverageZDepth(float averageZ)
-{
-	_averageZDepth = averageZ;
-}
-
 // Private methods
 void Polygon3D::Copy(const Polygon3D& p)
 {
@@ -114,6 +125,6 @@ void Polygon3D::Copy(const Polygon3D& p)
 	}
 
 	_averageZDepth = p.GetAverageZDepth();
-
+	_lightingColour = p.GetLightingColour();
 	_normal = p.GetPolygonNormal();
 }

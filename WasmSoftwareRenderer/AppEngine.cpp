@@ -7,6 +7,8 @@
 #include "MD2Loader.h"
 #include "Model3D.h"
 #include "Camera.h"
+#include "LightAmbient.h"
+#include "LightPoint.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -22,6 +24,11 @@ Model3D cube = Model3D();
 Model3D marvin = Model3D();
 Camera cammy = Camera();
 float rot = 0;
+
+// LIGHTS
+LightAmbient ambientLight = LightAmbient(0.0f, 188.0f, 188.0f, 0.2f, 0.2f, 0.2f);
+vector<LightDirectional> directionalLights;
+vector<LightPoint> pointLights;
 
 void DrawWireFrame(const Model3D& model)
 {
@@ -88,7 +95,7 @@ void DrawSolidFlat(const Model3D& model)
 				Vertex vert = model.GetTransformedVertex(polyIndex);
 
 				// Create an SDL_Vertex from the Vertex info
-				verts[j] = SDL_Vertex{ SDL_FPoint{ vert.GetX(), vert.GetY() }, SDL_Color{255, 0, 0, 255}, SDL_FPoint{ 0 } };
+				verts[j] = SDL_Vertex{ SDL_FPoint{ vert.GetX(), vert.GetY() }, poly.GetLightingColour(), SDL_FPoint{0}};
 			}
 
 			SDL_RenderGeometry(renderer, nullptr, verts, 3, nullptr, 0);
@@ -120,6 +127,11 @@ bool handle_events()
 
 	// backface culling
 	marvin.CalculateBackfaces(cammy.GetPosition());
+
+	// lighting
+	marvin.CalculateLightingAmbient(ambientLight);
+	marvin.CalculateLightingDirectional(directionalLights);
+	marvin.CalculateLightingPoint(pointLights);
 
 	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 
@@ -215,6 +227,15 @@ int main(int argc, char** argv)
 	// Wireframe models testing...
 	MD2Loader::LoadModel("assets/cube.md2", cube);
 	MD2Loader::LoadModel("assets/marvin.md2", marvin);
+
+	// Lighting setup
+	Vector3D lightDirection(1.0f, 0.0f, 1.0f);
+	LightDirectional directLight(0.0f, 255.0f, 255.0f, lightDirection);
+	directionalLights.push_back(directLight);
+
+	Vertex pointLightPosition(0.0f, 0.0f, -20.0f, 0.0f);
+	LightPoint pointLight(255.0f, 255.0f, 0.0f, pointLightPosition, 0.0f, 1.0f, 0.0f, true);
+	pointLights.push_back(pointLight);
 
 	run_main_loop();
 

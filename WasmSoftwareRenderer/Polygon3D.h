@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL.h>
 #include "Vector3D.h"
 
 class Polygon3D
@@ -16,7 +17,8 @@ public:
 	bool DrawPolygon(void) const;
 	float GetAverageZDepth(void) const;
 	void SetAverageZDepth(float averageZ);
-
+	SDL_Color GetLightingColour(void) const;
+	void SetLightingColour(const SDL_Color& color);
 	Vector3D GetPolygonNormal(void) const;
 	void SetPolygonNormal(const Vector3D& normal);
 
@@ -24,7 +26,7 @@ private:
 	int _vertIndex[3];
 	bool _isBackFacing;
 	float _averageZDepth;
-
+	SDL_Color _lightingColour;
 	Vector3D _normal;
 
 	void Copy(const Polygon3D& p);

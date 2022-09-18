@@ -2,6 +2,9 @@
 #include "Vertex.h"
 #include "Polygon3D.h"
 #include "Matrix3D.h"
+#include "LightAmbient.h"
+#include "LightDirectional.h"
+#include "LightPoint.h"
 #include <vector>
 
 using namespace std;
@@ -19,6 +22,12 @@ public:
 	Vertex GetTransformedVertex(int index) const;
 	Polygon3D GetPolygon(int index) const;
 	int GetPolygons() const;
+	float GetDiffuseRed() const;
+	void SetDiffuseRed(float diffuseR);
+	float GetDiffuseGreen() const;
+	void SetDiffuseGreen(float diffuseG);
+	float GetDiffuseBlue() const;
+	void SetDiffuseBlue(float diffuseB);
 
 	Vector3D GetWorldRotations(void) const;
 	Vector3D GetWorldTranslations(void) const;
@@ -36,10 +45,19 @@ public:
 
 	void Sort(void);
 
+	// lighting
+	void CalculateLightingAmbient(const LightAmbient& ambientLight);
+	void CalculateLightingDirectional(const vector<LightDirectional>& directionalLights);
+
+	void CalculateLightingPoint(const vector<LightPoint>& pointLights);
+
 private:
 	vector<Vertex> _vertices;
 	vector<Polygon3D> _polygons;
 	vector<Vertex> _transVerts;
+	float _diffuseRed;
+	float _diffuseGreen;
+	float _diffuseBlue;
 
 	Vector3D _worldRotations;
 	Vector3D _worldTranslations;
