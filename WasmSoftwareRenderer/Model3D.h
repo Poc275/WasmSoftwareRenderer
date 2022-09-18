@@ -42,14 +42,15 @@ public:
 	void ApplyTransformToTransformedVertices(const Matrix3D& transform);
 	void Dehomogenize(void);
 	void CalculateBackfaces(const Vertex& cameraPosition);
-
+	void CalculateVertexNormals(void);
 	void Sort(void);
 
 	// lighting
 	void CalculateLightingAmbient(const LightAmbient& ambientLight);
 	void CalculateLightingDirectional(const vector<LightDirectional>& directionalLights);
-
+	void CalculateLightingDirectionalGouraud(const vector<LightDirectional>& directionalLights);
 	void CalculateLightingPoint(const vector<LightPoint>& pointLights);
+	void CalculateLightingPointGouraud(const vector<LightPoint>& pointLights);
 
 private:
 	vector<Vertex> _vertices;

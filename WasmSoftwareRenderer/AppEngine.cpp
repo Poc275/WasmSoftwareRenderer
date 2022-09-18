@@ -103,6 +103,38 @@ void DrawSolidFlat(const Model3D& model)
 	}
 }
 
+void DrawSolidGouraud(const Model3D& model)
+{
+	int nPolygons = model.GetPolygons();
+	SDL_Vertex verts[3];
+
+	for (int i = 0; i < nPolygons; i++)
+	{
+		// Get polygon
+		Polygon3D poly = model.GetPolygon(i);
+
+		// only draw if not backward facing
+		if (poly.DrawPolygon())
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				// Get polygon index
+				int polyIndex = poly.GetVertexIndex(j);
+
+				// Get vertex from index
+				Vertex vert = model.GetTransformedVertex(polyIndex);
+
+				// Create an SDL_Vertex from the Vertex info
+				// Only difference here is that we're using the vertex colour, not the polygon colour
+				// SDL will interpolate the colour across the polygon for us (cheat!)
+				verts[j] = SDL_Vertex{ SDL_FPoint{ vert.GetX(), vert.GetY() }, vert.GetVertexColour(), SDL_FPoint{0}};
+			}
+
+			SDL_RenderGeometry(renderer, nullptr, verts, 3, nullptr, 0);
+		}
+	}
+}
+
 bool handle_events()
 {
 	SDL_Event event;
@@ -128,10 +160,17 @@ bool handle_events()
 	// backface culling
 	marvin.CalculateBackfaces(cammy.GetPosition());
 
+	// calculate vertex normals for Gouraud shading
+	marvin.CalculateVertexNormals();
+
 	// lighting
 	marvin.CalculateLightingAmbient(ambientLight);
-	marvin.CalculateLightingDirectional(directionalLights);
-	marvin.CalculateLightingPoint(pointLights);
+	//marvin.CalculateLightingDirectional(directionalLights);
+	//marvin.CalculateLightingPoint(pointLights);
+	
+	// lighting for Gouraud shading (ambient doesn't rely on normals, is just "flat" shading)
+	marvin.CalculateLightingDirectionalGouraud(directionalLights);
+	marvin.CalculateLightingPointGouraud(pointLights);
 
 	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 
@@ -143,7 +182,8 @@ bool handle_events()
 	marvin.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
 
 	//DrawWireFrame(marvin);
-	DrawSolidFlat(marvin);
+	//DrawSolidFlat(marvin);
+	DrawSolidGouraud(marvin);
 
 	SDL_RenderPresent(renderer);
 

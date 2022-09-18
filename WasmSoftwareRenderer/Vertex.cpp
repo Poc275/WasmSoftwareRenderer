@@ -1,9 +1,17 @@
 #include "Vertex.h"
 
 // Constructors
-Vertex::Vertex(void) : Coordinate() {}
+Vertex::Vertex(void) : Coordinate()
+{
+	_colour = SDL_Color{ 0, 0, 0, 255 };
+	_count = 0;
+}
 
-Vertex::Vertex(float x, float y, float z, float w) : Coordinate(x, y, z, w) {}
+Vertex::Vertex(float x, float y, float z, float w) : Coordinate(x, y, z, w)
+{
+	_colour = SDL_Color{ 0, 0, 0, 255 };
+	_count = 0;
+}
 
 Vertex::Vertex(const Vertex& v)
 {
@@ -45,6 +53,42 @@ Vertex Vertex::operator+(const Vector3D& rhs)
 	return Vertex(x, y, z, 1.0f);
 }
 
+// Properties
+Vector3D Vertex::GetVertexNormal() const
+{
+	return _normal;
+}
+
+void Vertex::SetVertexNormal(const Vector3D& normal)
+{
+	_normal = normal;
+}
+
+SDL_Color Vertex::GetVertexColour() const
+{
+	return _colour;
+}
+
+void Vertex::SetVertexColour(const SDL_Color& colour)
+{
+	_colour = colour;
+}
+
+int Vertex::GetNormalCount() const
+{
+	return _count;
+}
+
+void Vertex::SetNormalCount(int count)
+{
+	_count = count;
+}
+
+void Vertex::IncrementNormalCount()
+{
+	_count++;
+}
+
 // Public methods
 Vertex& Vertex::DehomogenizeVertex()
 {
@@ -68,4 +112,8 @@ void Vertex::Copy(const Vertex& v)
 	_y = v.GetY();
 	_z = v.GetZ();
 	_w = v.GetW();
+
+	_normal = v.GetVertexNormal();
+	_colour = v.GetVertexColour();
+	_count = v.GetNormalCount();
 }
