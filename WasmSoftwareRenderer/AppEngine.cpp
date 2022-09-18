@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <cmath>
+#include <vector>
 #include "Vertex.h"
 #include "Matrix3D.h"
 #include "MD2Loader.h"
@@ -11,6 +12,8 @@
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #endif // _EMSCRIPTEN__
+
+using namespace std;
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -63,6 +66,36 @@ void DrawWireFrame(const Model3D& model)
 	}
 }
 
+void DrawSolidFlat(const Model3D& model)
+{
+	int nPolygons = model.GetPolygons();
+	SDL_Vertex verts[3];
+
+	for (int i = 0; i < nPolygons; i++)
+	{
+		// Get polygon
+		Polygon3D poly = model.GetPolygon(i);
+
+		// only draw if not backward facing
+		if (poly.DrawPolygon())
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				// Get polygon index
+				int polyIndex = poly.GetVertexIndex(j);
+
+				// Get vertex from index
+				Vertex vert = model.GetTransformedVertex(polyIndex);
+
+				// Create an SDL_Vertex from the Vertex info
+				verts[j] = SDL_Vertex{ SDL_FPoint{ vert.GetX(), vert.GetY() }, SDL_Color{255, 0, 0, 255}, SDL_FPoint{ 0 } };
+			}
+
+			SDL_RenderGeometry(renderer, nullptr, verts, 3, nullptr, 0);
+		}
+	}
+}
+
 bool handle_events()
 {
 	SDL_Event event;
@@ -97,7 +130,9 @@ bool handle_events()
 	marvin.Dehomogenize();
 	marvin.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
 
-	DrawWireFrame(marvin);
+	//DrawWireFrame(marvin);
+	DrawSolidFlat(marvin);
+
 	SDL_RenderPresent(renderer);
 
 	return true;
@@ -171,7 +206,6 @@ int main(int argc, char** argv)
 			verts[i] = moveBack * loopRotate * loopScale * moveToOrigin * verts[i];
 		}
 
-
 		SDL_RenderDrawLineF(renderer, verts[0].GetX(), verts[0].GetY(), verts[1].GetX(), verts[1].GetY());
 		SDL_RenderDrawLineF(renderer, verts[1].GetX(), verts[1].GetY(), verts[2].GetX(), verts[2].GetY());
 		SDL_RenderDrawLineF(renderer, verts[2].GetX(), verts[2].GetY(), verts[3].GetX(), verts[3].GetY());
@@ -181,25 +215,6 @@ int main(int argc, char** argv)
 	// Wireframe models testing...
 	MD2Loader::LoadModel("assets/cube.md2", cube);
 	MD2Loader::LoadModel("assets/marvin.md2", marvin);
-
-	marvin.ApplyTransformToLocalVertices(Matrix3D::RotateModel(marvin.GetWorldRotations()));
-	marvin.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(marvin.GetWorldTranslations()));
-	marvin.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(marvin.GetWorldScales()));
-
-	// backface culling
-	marvin.CalculateBackfaces(cammy.GetPosition());
-
-	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
-
-	// polygon sorting
-	marvin.Sort();
-
-	marvin.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
-	marvin.Dehomogenize();
-	marvin.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
-	DrawWireFrame(marvin);
-
-	SDL_RenderPresent(renderer);
 
 	run_main_loop();
 
