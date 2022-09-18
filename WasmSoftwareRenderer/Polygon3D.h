@@ -14,7 +14,7 @@ public:
 	int GetVertexIndex(int index) const;
 	void SetBackFacing(bool backwards);
 	bool DrawPolygon(void) const;
-	inline float GetAverageZDepth(void) const;
+	float GetAverageZDepth(void) const;
 	void SetAverageZDepth(float averageZ);
 
 	Vector3D GetPolygonNormal(void) const;
