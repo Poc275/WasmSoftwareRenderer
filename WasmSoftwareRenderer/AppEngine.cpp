@@ -16,7 +16,7 @@ SDL_Window* window;
 SDL_Renderer* renderer;
 
 Model3D cube = Model3D();
-Camera cammy = Camera(0, 0, 0, Vertex(0, 0, -50.0f, 1.0f), 640, 480);
+Camera cammy = Camera();
 float rot = 0;
 
 void DrawWireFrame(const Model3D& model)
@@ -28,30 +28,35 @@ void DrawWireFrame(const Model3D& model)
 	{
 		// Get polygon
 		Polygon3D poly = model.GetPolygon(i);
-		for (int j = 0; j < 3; j++)
+
+		// only draw if not backward facing
+		if (poly.DrawPolygon())
 		{
-			// Get polygon index
-			int polyIndex = poly.GetVertexIndex(j);
-
-			// Get vertex from index
-			Vertex vert = model.GetTransformedVertex(polyIndex);
-
-			// Populate vertices array with X and Y values
-			points[j].SetX(vert.GetX());
-			points[j].SetY(vert.GetY());
-		}
-
-		// Draw the polygon now we have the 3 points
-		for (int j = 0; j < 3; j++)
-		{
-			if (j == 2)
+			for (int j = 0; j < 3; j++)
 			{
-				// We are at the last vertex, so draw line back to the beginning
-				SDL_RenderDrawLineF(renderer, points[j].GetX(), points[j].GetY(), points[0].GetX(), points[0].GetY());
+				// Get polygon index
+				int polyIndex = poly.GetVertexIndex(j);
+
+				// Get vertex from index
+				Vertex vert = model.GetTransformedVertex(polyIndex);
+
+				// Populate vertices array with X and Y values
+				points[j].SetX(vert.GetX());
+				points[j].SetY(vert.GetY());
 			}
-			else
+
+			// Draw the polygon now we have the 3 points
+			for (int j = 0; j < 3; j++)
 			{
-				SDL_RenderDrawLineF(renderer, points[j].GetX(), points[j].GetY(), points[j + 1].GetX(), points[j + 1].GetY());
+				if (j == 2)
+				{
+					// We are at the last vertex, so draw line back to the beginning
+					SDL_RenderDrawLineF(renderer, points[j].GetX(), points[j].GetY(), points[0].GetX(), points[0].GetY());
+				}
+				else
+				{
+					SDL_RenderDrawLineF(renderer, points[j].GetX(), points[j].GetY(), points[j + 1].GetX(), points[j + 1].GetY());
+				}
 			}
 		}
 	}
@@ -78,6 +83,9 @@ bool handle_events()
 	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
 	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
 	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
+
+	// backface culling
+	cube.CalculateBackfaces(cammy.GetPosition());
 
 	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
@@ -167,9 +175,13 @@ int main(int argc, char** argv)
 
 	// Wireframe models testing...
 	MD2Loader::LoadModel("assets/cube.md2", cube);
+
 	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
 	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
 	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
+
+	// backface culling
+	cube.CalculateBackfaces(cammy.GetPosition());
 
 	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());

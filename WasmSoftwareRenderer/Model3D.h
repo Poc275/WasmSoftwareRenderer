@@ -32,6 +32,7 @@ public:
 	void ApplyTransformToLocalVertices(const Matrix3D& transform);
 	void ApplyTransformToTransformedVertices(const Matrix3D& transform);
 	void Dehomogenize(void);
+	void CalculateBackfaces(const Vertex& cameraPosition);
 
 private:
 	vector<Vertex> _vertices;

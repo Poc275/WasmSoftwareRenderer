@@ -7,6 +7,9 @@ Polygon3D::Polygon3D(void)
 	{
 		_vertIndex[i] = 0;
 	}
+
+	_isBackFacing = false;
+	_normal = Vector3D();
 }
 
 Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
@@ -14,6 +17,8 @@ Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
 	_vertIndex[0] = indexOne;
 	_vertIndex[1] = indexTwo;
 	_vertIndex[2] = indexThree;
+	_isBackFacing = false;
+	_normal = Vector3D();
 }
 
 Polygon3D::Polygon3D(const Polygon3D& p)
@@ -40,6 +45,43 @@ int Polygon3D::GetVertexIndex(int index) const
 	return _vertIndex[index];
 }
 
+Vector3D Polygon3D::GetPolygonNormal(void) const
+{
+	return _normal;
+}
+
+void Polygon3D::SetPolygonNormal(const Vector3D& normal)
+{
+	_normal = normal;
+}
+
+// Public methods
+void Polygon3D::SetBackFacing(bool backwards)
+{
+	// If this is called then the polygon is backward facing
+	if (backwards)
+	{
+		_isBackFacing = true;
+	}
+	else
+	{
+		_isBackFacing = false;
+	}
+}
+
+bool Polygon3D::DrawPolygon(void) const
+{
+	// If polygon is NOT backwards facing then we can draw it
+	if (!_isBackFacing)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 // Private methods
 void Polygon3D::Copy(const Polygon3D& p)
 {
@@ -47,4 +89,15 @@ void Polygon3D::Copy(const Polygon3D& p)
 	{
 		_vertIndex[i] = p.GetVertexIndex(i);
 	}
+
+	if (p.DrawPolygon())
+	{
+		_isBackFacing = false;
+	}
+	else
+	{
+		_isBackFacing = true;
+	}
+
+	_normal = p.GetPolygonNormal();
 }

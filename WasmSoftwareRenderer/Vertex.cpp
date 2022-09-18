@@ -25,6 +25,26 @@ Vertex& Vertex::operator=(const Vertex& rhs)
 	return *this;
 }
 
+Vector3D Vertex::operator-(const Vertex& rhs)
+{
+	// Operator overload to subtracts two vertices and returns a vector
+	float vectX = this->GetX() - rhs.GetX();
+	float vectY = this->GetY() - rhs.GetY();
+	float vectZ = this->GetZ() - rhs.GetZ();
+
+	return Vector3D(vectX, vectY, vectZ);
+}
+
+Vertex Vertex::operator+(const Vector3D& rhs)
+{
+	// Operator overload to add a vector to a vertex
+	float x = this->GetX() + rhs.GetX();
+	float y = this->GetY() + rhs.GetY();
+	float z = this->GetZ() + rhs.GetZ();
+
+	return Vertex(x, y, z, 1.0f);
+}
+
 // Public methods
 Vertex& Vertex::DehomogenizeVertex()
 {

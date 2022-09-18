@@ -130,6 +130,50 @@ void Model3D::Dehomogenize(void)
 	}
 }
 
+void Model3D::CalculateBackfaces(const Vertex& cameraPosition)
+{
+	Vertex verts[3];
+
+	for (unsigned int i = 0; i < _polygons.size(); i++)
+	{
+		// Reset backfacing polygons
+		if (!_polygons.at(i).DrawPolygon())
+		{
+			_polygons.at(i).SetBackFacing(false);
+		}
+
+		// Get polygon indexes and vertices from them and 
+		// add to collection ready for normal calculation
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			int polyIndex = _polygons.at(i).GetVertexIndex(j);
+			Vertex vert = _transVerts.at(polyIndex);
+			verts[j] = vert;
+		}
+		// Construct 2 vectors for this polygon
+		Vector3D vectorA = verts[1] - verts[0];
+		Vector3D vectorB = verts[2] - verts[0];
+
+		// Calculate cross product and normalise to get perpendicular vector
+		Vector3D normal = vectorA.CrossProduct(vectorB);
+		normal.Normalise();
+
+		// Store normalised polygon vector inside polygon ready for lighting calculations
+		_polygons.at(i).SetPolygonNormal(normal);
+
+		// Get eye (camera) direction and compare to normal vector
+		// by calculating the dot product
+		Vector3D eyeVector = verts[0] - cameraPosition;
+		float dotProduct = normal * eyeVector;
+
+		// Set polygon to be backfacing if dotProduct is less than zero
+		if (dotProduct < 0)
+		{
+			_polygons.at(i).SetBackFacing(true);
+		}
+	}
+}
+
 // Private methods
 void Model3D::Copy(const Model3D& m)
 {
@@ -142,4 +186,8 @@ void Model3D::Copy(const Model3D& m)
 	{
 		_polygons.at(i) = m.GetPolygon(i);
 	}
+
+	_worldRotations = m.GetWorldRotations();
+	_worldTranslations = m.GetWorldTranslations();
+	_worldScales = m.GetWorldScales();
 }

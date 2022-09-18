@@ -2,7 +2,13 @@
 #include <cmath>
 
 // Constructors
-Camera::Camera(void) {}
+Camera::Camera(void)
+{
+	// set sensible defaults for an empty constructor
+	Initialise(0, 0, 0,
+			   Vertex(0, 0, -50.0f, 1.0f),
+			   640, 480);
+}
 
 Camera::Camera(float xRotation, float yRotation, float zRotation,
 			   const Vertex& position,
