@@ -145,6 +145,7 @@
     <ClCompile Include="MD2Loader.cpp" />
     <ClCompile Include="Model3D.cpp" />
     <ClCompile Include="Polygon3D.cpp" />
+    <ClCompile Include="Vector3D.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="Model3D.h" />
     <ClInclude Include="Polygon3D.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Vector3D.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

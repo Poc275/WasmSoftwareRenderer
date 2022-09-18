@@ -1,4 +1,5 @@
 #pragma once
+#include "Vector3D.h"
 #include "Vertex.h"
 
 class Matrix3D
@@ -36,6 +37,10 @@ public:
 
 	const Matrix3D operator* (const Matrix3D& other) const;
 	const Vertex operator* (const Vertex& p) const;
+
+	static Matrix3D TranslateModel(const Vector3D& translations);
+	static Matrix3D RotateModel(const Vector3D& rotations);
+	static Matrix3D ScaleModel(const Vector3D& scales);
 
 private:
 	float _matrix3D[4][4];

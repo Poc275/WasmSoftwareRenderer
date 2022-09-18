@@ -15,26 +15,9 @@
 SDL_Window* window;
 SDL_Renderer* renderer;
 
-bool handle_events()
-{
-	SDL_Event event;
-	SDL_PollEvent(&event);
-	if (event.type == SDL_QUIT)
-	{
-		return false;
-	}
-	return true;
-}
-
-void run_main_loop()
-{
-#ifdef __EMSCRIPTEN__
-	emscripten_set_main_loop([]() { handle_events(); }, 0, true);
-#else
-	while (handle_events())
-		;
-#endif // __EMSCRIPTEN__
-}
+Model3D cube = Model3D();
+Camera cammy = Camera(0, 0, 0, Vertex(0, 0, -50.0f, 1.0f), 640, 480);
+float rot = 0;
 
 void DrawWireFrame(const Model3D& model)
 {
@@ -72,6 +55,50 @@ void DrawWireFrame(const Model3D& model)
 			}
 		}
 	}
+}
+
+bool handle_events()
+{
+	SDL_Event event;
+	SDL_PollEvent(&event);
+	if (event.type == SDL_QUIT)
+	{
+		return false;
+	}
+
+	// rotate model test
+	rot += 0.001f;
+
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x80, 0x00, 0xFF);
+
+	cube.SetWorldRotations(Vector3D(0, rot, 0));
+
+	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
+	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
+	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
+
+	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
+	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
+	cube.Dehomogenize();
+	cube.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
+
+	DrawWireFrame(cube);
+	SDL_RenderPresent(renderer);
+
+	return true;
+}
+
+void run_main_loop()
+{
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop([]() { handle_events(); }, 0, true);
+#else
+	while (handle_events())
+		;
+	
+#endif // __EMSCRIPTEN__
 }
 
 int main(int argc, char** argv)
@@ -139,16 +166,16 @@ int main(int argc, char** argv)
 	}*/
 
 	// Wireframe models testing...
-	Model3D cube = Model3D();
 	MD2Loader::LoadModel("assets/cube.md2", cube);
-	Camera cammy = Camera(0, 0, 0, Vertex(0, 0, -50.0f, 1.0f), 640, 480);
+	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
+	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
+	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
 
-	cube.ApplyTransformToLocalVertices(cammy.GetViewpointTransformation());
+	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
 	cube.Dehomogenize();
 	cube.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
 	DrawWireFrame(cube);
-
 
 	SDL_RenderPresent(renderer);
 

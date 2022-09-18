@@ -3,7 +3,9 @@
 // Constructors
 Model3D::Model3D(void)
 {
-
+	_worldRotations = Vector3D(0.0f, 0.0f, 0.0f);
+	_worldTranslations = Vector3D(0.0f, 0.0f, 0.0f);
+	_worldScales = Vector3D(1.0f, 1.0f, 1.0f);
 }
 
 Model3D::Model3D(const Model3D& m)
@@ -43,6 +45,36 @@ Polygon3D Model3D::GetPolygon(int index) const
 int Model3D::GetPolygons() const
 {
 	return _polygons.size();
+}
+
+Vector3D Model3D::GetWorldRotations(void) const
+{
+	return _worldRotations;
+}
+
+Vector3D Model3D::GetWorldTranslations(void) const
+{
+	return _worldTranslations;
+}
+
+Vector3D Model3D::GetWorldScales(void) const
+{
+	return _worldScales;
+}
+
+void Model3D::SetWorldRotations(const Vector3D& worldRot)
+{
+	_worldRotations = worldRot;
+}
+
+void Model3D::SetWorldTranslations(const Vector3D& worldTrans)
+{
+	_worldTranslations = worldTrans;
+}
+
+void Model3D::SetWorldScales(const Vector3D& worldScales)
+{
+	_worldScales = worldScales;
 }
 
 // Public methods

@@ -1,5 +1,6 @@
 #include "Matrix3D.h"
 #include "Vertex.h"
+#include <cmath>
 
 // Constructors
 Matrix3D::Matrix3D(void)
@@ -138,6 +139,50 @@ const Vertex Matrix3D::operator*(const Vertex& p) const
 
 	// Create Vertex with result
 	return Vertex(totalX, totalY, totalZ, totalW);
+}
+
+// World transform methods
+Matrix3D Matrix3D::TranslateModel(const Vector3D& translations)
+{
+	Matrix3D translate(1.0f, 0.0f, 0.0f, translations.GetX(),
+					   0.0f, 1.0f, 0.0f, translations.GetY(),
+					   0.0f, 0.0f, 1.0f, translations.GetZ(),
+					   0.0f, 0.0f, 0.0f, 1.0f);
+
+	return translate;
+}
+
+Matrix3D Matrix3D::RotateModel(const Vector3D& rotations)
+{
+	// Rotate around x axis
+	Matrix3D rotationX(1.0f, 0.0f, 0.0f, 0.0f,
+					   0.0f, cos(rotations.GetX()), sin(rotations.GetX()) * -1.0f, 0.0f,
+					   0.0f, sin(rotations.GetX()), cos(rotations.GetX()), 0.0f,
+					   0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Rotate around y axis
+	Matrix3D rotationY(cos(rotations.GetY()), 0.0f, sin(rotations.GetY()), 0.0f,
+					   0.0f, 1.0f, 0.0f, 0.0f,
+					   sin(rotations.GetY()) * -1.0f, 0.0f, cos(rotations.GetY()), 0.0f,
+					   0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Rotate around z axis
+	Matrix3D rotationZ(cos(rotations.GetZ()), sin(rotations.GetZ()) * -1.0f, 0.0f, 0.0f,
+					   sin(rotations.GetZ()), cos(rotations.GetZ()), 0.0f, 0.0f,
+					   0.0f, 0.0f, 1.0f, 0.0f,
+					   0.0f, 0.0f, 0.0f, 1.0f);
+
+	return rotationX * rotationY * rotationZ;
+}
+
+Matrix3D Matrix3D::ScaleModel(const Vector3D& scales)
+{
+	Matrix3D scale(scales.GetX(), 0.0f, 0.0f, 0.0f,
+				   0.0f, scales.GetY(), 0.0f, 0.0f,
+				   0.0f, 0.0f, scales.GetZ(), 0.0f,
+				   0.0f, 0.0f, 0.0f, 1.0f);
+
+	return scale;
 }
 
 // Private methods
