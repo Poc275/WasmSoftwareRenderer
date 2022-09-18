@@ -16,6 +16,7 @@ SDL_Window* window;
 SDL_Renderer* renderer;
 
 Model3D cube = Model3D();
+Model3D marvin = Model3D();
 Camera cammy = Camera();
 float rot = 0;
 
@@ -78,21 +79,25 @@ bool handle_events()
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x80, 0x00, 0xFF);
 
-	cube.SetWorldRotations(Vector3D(0, rot, 0));
+	marvin.SetWorldRotations(Vector3D(0, rot, 0));
 
-	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
-	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
-	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
+	marvin.ApplyTransformToLocalVertices(Matrix3D::RotateModel(marvin.GetWorldRotations()));
+	marvin.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(marvin.GetWorldTranslations()));
+	marvin.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(marvin.GetWorldScales()));
 
 	// backface culling
-	cube.CalculateBackfaces(cammy.GetPosition());
+	marvin.CalculateBackfaces(cammy.GetPosition());
 
-	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
-	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
-	cube.Dehomogenize();
-	cube.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
+	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
 
-	DrawWireFrame(cube);
+	// polygon sorting
+	marvin.Sort();
+
+	marvin.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
+	marvin.Dehomogenize();
+	marvin.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
+
+	DrawWireFrame(marvin);
 	SDL_RenderPresent(renderer);
 
 	return true;
@@ -175,19 +180,24 @@ int main(int argc, char** argv)
 
 	// Wireframe models testing...
 	MD2Loader::LoadModel("assets/cube.md2", cube);
+	MD2Loader::LoadModel("assets/marvin.md2", marvin);
 
-	cube.ApplyTransformToLocalVertices(Matrix3D::RotateModel(cube.GetWorldRotations()));
-	cube.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(cube.GetWorldTranslations()));
-	cube.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(cube.GetWorldScales()));
+	marvin.ApplyTransformToLocalVertices(Matrix3D::RotateModel(marvin.GetWorldRotations()));
+	marvin.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(marvin.GetWorldTranslations()));
+	marvin.ApplyTransformToTransformedVertices(Matrix3D::ScaleModel(marvin.GetWorldScales()));
 
 	// backface culling
-	cube.CalculateBackfaces(cammy.GetPosition());
+	marvin.CalculateBackfaces(cammy.GetPosition());
 
-	cube.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
-	cube.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
-	cube.Dehomogenize();
-	cube.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
-	DrawWireFrame(cube);
+	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
+
+	// polygon sorting
+	marvin.Sort();
+
+	marvin.ApplyTransformToTransformedVertices(cammy.GetPerspectiveTransformation());
+	marvin.Dehomogenize();
+	marvin.ApplyTransformToTransformedVertices(cammy.GetScreenTransformation());
+	DrawWireFrame(marvin);
 
 	SDL_RenderPresent(renderer);
 

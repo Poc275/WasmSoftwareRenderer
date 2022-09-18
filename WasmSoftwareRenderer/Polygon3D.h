@@ -14,6 +14,8 @@ public:
 	int GetVertexIndex(int index) const;
 	void SetBackFacing(bool backwards);
 	bool DrawPolygon(void) const;
+	inline float GetAverageZDepth(void) const;
+	void SetAverageZDepth(float averageZ);
 
 	Vector3D GetPolygonNormal(void) const;
 	void SetPolygonNormal(const Vector3D& normal);
@@ -21,6 +23,7 @@ public:
 private:
 	int _vertIndex[3];
 	bool _isBackFacing;
+	float _averageZDepth;
 
 	Vector3D _normal;
 

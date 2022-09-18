@@ -1,4 +1,5 @@
 #include "Model3D.h"
+#include <algorithm>
 
 // Constructors
 Model3D::Model3D(void)
@@ -174,7 +175,33 @@ void Model3D::CalculateBackfaces(const Vertex& cameraPosition)
 	}
 }
 
+void Model3D::Sort(void)
+{
+	float averageZDepth = 0.0f;
+
+	for (unsigned int i = 0; i < _polygons.size(); i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			int polyIndex = _polygons.at(i).GetVertexIndex(j);
+			Vertex vert = _transVerts.at(polyIndex);
+			averageZDepth += vert.GetZ();
+		}
+		// Store average z depth inside polygon and reset
+		// the average Z depth counter ready for the next polygon
+		_polygons.at(i).SetAverageZDepth(averageZDepth / 3);
+		averageZDepth = 0.0f;
+	}
+	// Now sort the polygon collection according to z depth
+	std::sort(_polygons.begin(), _polygons.end(), &ZDepthSorter);
+}
+
 // Private methods
+bool Model3D::ZDepthSorter(const Polygon3D& poly1, const Polygon3D& poly2)
+{
+	return poly1.GetAverageZDepth() > poly2.GetAverageZDepth();
+}
+
 void Model3D::Copy(const Model3D& m)
 {
 	for (unsigned int i = 0; i < _vertices.size(); i++)

@@ -9,6 +9,8 @@ Polygon3D::Polygon3D(void)
 	}
 
 	_isBackFacing = false;
+	_averageZDepth = 0.0f;
+
 	_normal = Vector3D();
 }
 
@@ -18,6 +20,8 @@ Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
 	_vertIndex[1] = indexTwo;
 	_vertIndex[2] = indexThree;
 	_isBackFacing = false;
+	_averageZDepth = 0.0f;
+
 	_normal = Vector3D();
 }
 
@@ -82,6 +86,16 @@ bool Polygon3D::DrawPolygon(void) const
 	}
 }
 
+inline float Polygon3D::GetAverageZDepth(void) const
+{
+	return _averageZDepth;
+}
+
+void Polygon3D::SetAverageZDepth(float averageZ)
+{
+	_averageZDepth = averageZ;
+}
+
 // Private methods
 void Polygon3D::Copy(const Polygon3D& p)
 {
@@ -98,6 +112,8 @@ void Polygon3D::Copy(const Polygon3D& p)
 	{
 		_isBackFacing = true;
 	}
+
+	_averageZDepth = p.GetAverageZDepth();
 
 	_normal = p.GetPolygonNormal();
 }

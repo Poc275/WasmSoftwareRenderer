@@ -34,6 +34,8 @@ public:
 	void Dehomogenize(void);
 	void CalculateBackfaces(const Vertex& cameraPosition);
 
+	void Sort(void);
+
 private:
 	vector<Vertex> _vertices;
 	vector<Polygon3D> _polygons;
@@ -43,5 +45,6 @@ private:
 	Vector3D _worldTranslations;
 	Vector3D _worldScales;
 
+	static bool ZDepthSorter(const Polygon3D& poly1, const Polygon3D& poly2);
 	void Copy(const Model3D& m);
 };
