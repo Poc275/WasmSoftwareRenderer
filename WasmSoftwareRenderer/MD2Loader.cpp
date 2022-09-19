@@ -152,8 +152,8 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model, const char* text
 		bHasTexture = LoadPCX(textureFilename, pTexture, pPalette, &header);
 		if (!bHasTexture)
 		{
-			delete(pTexture);
-			delete(pPalette);
+			delete[] pTexture;
+			delete[] pPalette;
 		}
 		else
 		{

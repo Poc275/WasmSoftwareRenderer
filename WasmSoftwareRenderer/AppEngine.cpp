@@ -19,20 +19,20 @@ using namespace std;
 
 struct ScanLine
 {
-	float xStart;
-	float xEnd;
-	SDL_Color startColour;
-	SDL_Color endColor;
+	float xStart = 0;
+	float xEnd = 0;
+	SDL_Color startColour = SDL_Color{ 0, 0, 0, 255 };
+	SDL_Color endColor = SDL_Color{ 0, 0, 0, 255 };
 	Texture startTexture;
 	Texture endTexture;
-	float startFogDensity;
+	/*float startFogDensity;
 	float endFogDensity;
 	float startUOverZ;
 	float endUOverZ;
 	float startVOverZ;
 	float endVOverZ;
 	float startZRecip;
-	float endZRecip;
+	float endZRecip;*/
 	Vector3D startNormal;
 	Vector3D endNormal;
 };
