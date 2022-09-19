@@ -1,12 +1,19 @@
 #include "Model3D.h"
 #include <algorithm>
 
+typedef unsigned char BYTE;
+
 // Constructors
 Model3D::Model3D(void)
 {
 	_diffuseRed = 0.5f;
 	_diffuseGreen = 0.5f;
 	_diffuseBlue = 0.5f;
+
+	_texture = new BYTE();
+	_palette = new SDL_Color();
+	_textureWidth = 0;
+
 	_worldRotations = Vector3D(0.0f, 0.0f, 0.0f);
 	_worldTranslations = Vector3D(0.0f, 0.0f, 0.0f);
 	_worldScales = Vector3D(1.0f, 1.0f, 1.0f);
@@ -18,7 +25,19 @@ Model3D::Model3D(const Model3D& m)
 }
 
 // Destructor
-Model3D::~Model3D() {}
+Model3D::~Model3D()
+{
+	if (this->GetTextureMapWidth() <= 0)
+	{
+		// No texture map was provided so
+		// we have nothing to delete
+	}
+	else
+	{
+		delete[] _texture;
+		delete[] _palette;
+	}
+}
 
 // Operator overloads
 Model3D& Model3D::operator=(const Model3D& rhs)
@@ -39,6 +58,11 @@ Vertex Model3D::GetVertex(int index) const
 Vertex Model3D::GetTransformedVertex(int index) const
 {
 	return _transVerts.at(index);
+}
+
+Texture Model3D::GetTexture(int index) const
+{
+	return _UVs.at(index);
 }
 
 Polygon3D Model3D::GetPolygon(int index) const
@@ -81,6 +105,42 @@ void Model3D::SetDiffuseBlue(float diffuseB)
 	_diffuseBlue = diffuseB;
 }
 
+BYTE* Model3D::GetTextureMap() const
+{
+	return _texture;
+}
+
+void Model3D::SetTextureMap(BYTE* texturemap)
+{
+	_texture = texturemap;
+}
+
+SDL_Color* Model3D::GetPalette() const
+{
+	return _palette;
+}
+
+void Model3D::SetPalette(SDL_Color* palette)
+{
+	_palette = palette;
+}
+
+void Model3D::SetTextureMapWidth(const int width)
+{
+	_textureWidth = width;
+}
+
+int Model3D::GetTextureMapWidth() const
+{
+	return _textureWidth;
+}
+
+SDL_Color Model3D::GetPaletteColour(int index) const
+{
+	int paletteIndex = _texture[index];
+	return _palette[paletteIndex];
+}
+
 Vector3D Model3D::GetWorldRotations(void) const
 {
 	return _worldRotations;
@@ -120,6 +180,11 @@ void Model3D::AddPolygon(Polygon3D poly)
 void Model3D::AddVertex(Vertex vert)
 {
 	_vertices.push_back(vert);
+}
+
+void Model3D::AddTexture(Texture texture)
+{
+	_UVs.push_back(texture);
 }
 
 void Model3D::ApplyTransformToLocalVertices(const Matrix3D& transform)
@@ -858,6 +923,15 @@ void Model3D::Copy(const Model3D& m)
 	_diffuseRed = m.GetDiffuseRed();
 	_diffuseGreen = m.GetDiffuseGreen();
 	_diffuseBlue = m.GetDiffuseBlue();
+
+	for (unsigned int i = 0; i < _UVs.size(); i++)
+	{
+		_UVs.at(i) = m.GetTexture(i);
+	}
+
+	_texture = m.GetTextureMap();
+	_palette = m.GetPalette();
+	_textureWidth = m.GetTextureMapWidth();
 
 	_worldRotations = m.GetWorldRotations();
 	_worldTranslations = m.GetWorldTranslations();

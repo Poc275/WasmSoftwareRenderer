@@ -7,6 +7,7 @@ Polygon3D::Polygon3D(void)
 	for (int i = 0; i < 3; i++)
 	{
 		_vertIndex[i] = 0;
+		_textureIndex[i] = 0;
 	}
 
 	_isBackFacing = false;
@@ -15,6 +16,7 @@ Polygon3D::Polygon3D(void)
 	_normal = Vector3D();
 }
 
+// Constructor without texture info
 Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
 {
 	_vertIndex[0] = indexOne;
@@ -24,6 +26,21 @@ Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree)
 	_averageZDepth = 0.0f;
 	_lightingColour = SDL_Color{ 0, 0, 0, 255 };
 	_normal = Vector3D();
+}
+
+// Constructor with texture info
+Polygon3D::Polygon3D(int indexOne, int indexTwo, int indexThree, int textureOne, int textureTwo, int textureThree)
+{
+	_vertIndex[0] = indexOne;
+	_vertIndex[1] = indexTwo;
+	_vertIndex[2] = indexThree;
+	_isBackFacing = false;
+	_averageZDepth = 0.0f;
+	_lightingColour = SDL_Color{ 0, 0, 0, 255 };
+	_normal = Vector3D();
+	_textureIndex[0] = textureOne;
+	_textureIndex[1] = textureTwo;
+	_textureIndex[2] = textureThree;
 }
 
 Polygon3D::Polygon3D(const Polygon3D& p)
@@ -80,6 +97,11 @@ void Polygon3D::SetLightingColour(const SDL_Color& color)
 	_lightingColour = color;
 }
 
+int Polygon3D::GetTextureIndex(int index) const
+{
+	return _textureIndex[index];
+}
+
 // Public methods
 void Polygon3D::SetBackFacing(bool backwards)
 {
@@ -113,6 +135,7 @@ void Polygon3D::Copy(const Polygon3D& p)
 	for (int i = 0; i < 3; i++)
 	{
 		_vertIndex[i] = p.GetVertexIndex(i);
+		_textureIndex[i] = p.GetTextureIndex(i);
 	}
 
 	if (p.DrawPolygon())

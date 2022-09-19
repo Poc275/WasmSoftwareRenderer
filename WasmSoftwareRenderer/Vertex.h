@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include "Coordinate.h"
+#include "Texture.h"
 #include "Vector3D.h"
 
 class Vertex : public Coordinate
@@ -22,6 +23,8 @@ public:
 	int GetNormalCount() const;
 	void SetNormalCount(int count);
 	void IncrementNormalCount();
+	Texture GetVertexTexture() const;
+	void SetVertexTexture(const Texture& texture);
 
 	Vertex& DehomogenizeVertex();
 
@@ -29,6 +32,7 @@ private:
 	Vector3D _normal;
 	SDL_Color _colour;
 	int _count;
+	Texture _texture;
 
 	void Copy(const Vertex& v);
 };

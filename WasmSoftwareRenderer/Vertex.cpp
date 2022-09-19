@@ -89,6 +89,16 @@ void Vertex::IncrementNormalCount()
 	_count++;
 }
 
+Texture Vertex::GetVertexTexture() const
+{
+	return _texture;
+}
+
+void Vertex::SetVertexTexture(const Texture& texture)
+{
+	_texture = texture;
+}
+
 // Public methods
 Vertex& Vertex::DehomogenizeVertex()
 {
@@ -116,4 +126,5 @@ void Vertex::Copy(const Vertex& v)
 	_normal = v.GetVertexNormal();
 	_colour = v.GetVertexColour();
 	_count = v.GetNormalCount();
+	_texture = v.GetVertexTexture();
 }

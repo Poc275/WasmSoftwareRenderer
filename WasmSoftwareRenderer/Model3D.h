@@ -5,9 +5,12 @@
 #include "LightAmbient.h"
 #include "LightDirectional.h"
 #include "LightPoint.h"
+#include "Texture.h"
 #include <vector>
 
 using namespace std;
+
+typedef unsigned char BYTE;
 
 class Model3D
 {
@@ -20,6 +23,7 @@ public:
 
 	Vertex GetVertex(int index) const;
 	Vertex GetTransformedVertex(int index) const;
+	Texture GetTexture(int index) const;
 	Polygon3D GetPolygon(int index) const;
 	int GetPolygons() const;
 	float GetDiffuseRed() const;
@@ -28,6 +32,14 @@ public:
 	void SetDiffuseGreen(float diffuseG);
 	float GetDiffuseBlue() const;
 	void SetDiffuseBlue(float diffuseB);
+
+	BYTE* GetTextureMap() const;
+	void SetTextureMap(BYTE* texturemap);
+	SDL_Color* GetPalette() const;
+	void SetPalette(SDL_Color* palette);
+	void SetTextureMapWidth(const int width);
+	int GetTextureMapWidth() const;
+	SDL_Color GetPaletteColour(int index) const;
 
 	Vector3D GetWorldRotations(void) const;
 	Vector3D GetWorldTranslations(void) const;
@@ -38,6 +50,7 @@ public:
 
 	void AddPolygon(Polygon3D poly);
 	void AddVertex(Vertex vert);
+	void AddTexture(Texture texture);
 	void ApplyTransformToLocalVertices(const Matrix3D& transform);
 	void ApplyTransformToTransformedVertices(const Matrix3D& transform);
 	void Dehomogenize(void);
@@ -59,6 +72,11 @@ private:
 	float _diffuseRed;
 	float _diffuseGreen;
 	float _diffuseBlue;
+
+	vector<Texture> _UVs;
+	BYTE* _texture;
+	SDL_Color* _palette;
+	int _textureWidth;
 
 	Vector3D _worldRotations;
 	Vector3D _worldTranslations;

@@ -42,6 +42,12 @@ struct Md2Triangle
 	short uvIndex[3];       // Texture coordinate indices 
 };
 
+// Texture co-ordinates struct
+struct Md2TexCoord
+{
+	short texCoord[2];
+};
+
 struct Md2Vertex
 {
 	BYTE v[3];                // Compressed vertex (x, y, z) coordinates
@@ -56,6 +62,26 @@ struct Md2Frame
 	Md2Vertex   verts[1];       // First vertex of this frame
 };
 
+struct PcxHeader
+{
+	BYTE  ID;
+	BYTE  Version;
+	BYTE  Encoding;
+	BYTE  BitsPerPixel;
+	short XMin;
+	short YMin;
+	short XMax;
+	short YMax;
+	short HRes;
+	short VRes;
+	BYTE  ClrMap[16 * 3];
+	BYTE  Reserved;
+	BYTE  NumPlanes;
+	short BytesPerLine;
+	short Pal;
+	BYTE  Filler[58];
+};
+
 MD2Loader::MD2Loader(void)
 {
 }
@@ -68,7 +94,7 @@ MD2Loader::~MD2Loader(void)
 // LoadModel() - load model from file.
 // ----------------------------------------------
 
-bool MD2Loader::LoadModel(const char* filename, Model3D& model)
+bool MD2Loader::LoadModel(const char* filename, Model3D& model, const char* textureFilename)
 {
 	ifstream   file;
 
@@ -95,6 +121,7 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model)
 	// We are only interested in the first frame 
 	BYTE* frameBuffer = new BYTE[header.frameSize];
 	Md2Frame* frame = reinterpret_cast<Md2Frame*>(frameBuffer);
+	Md2TexCoord* texCoords = new Md2TexCoord[header.numTexCoords];
 
 	// Read polygon data...
 	file.seekg(header.offsetTriangles, ios::beg);
@@ -104,10 +131,37 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model)
 	file.seekg(header.offsetFrames, ios::beg);
 	file.read(reinterpret_cast<char*>(frame), header.frameSize);
 
+	// Read texture coordinate data
+	file.seekg(header.offsetTexCoords, std::ios::beg);
+	file.read(reinterpret_cast<char*>(texCoords), sizeof(Md2TexCoord) * header.numTexCoords);
+
 	// Close the file 
 	file.close();
 
 	//----------------------------------------------------------------------------------------------
+
+	// PCX Texture file initialization
+	bool bHasTexture = false;
+
+	// Attempt to load texture
+	if (textureFilename != 0)
+	{
+		BYTE* pTexture = new BYTE[header.skinWidth * header.skinHeight];
+		SDL_Color* pPalette = new SDL_Color[256];
+
+		bHasTexture = LoadPCX(textureFilename, pTexture, pPalette, &header);
+		if (!bHasTexture)
+		{
+			delete(pTexture);
+			delete(pPalette);
+		}
+		else
+		{
+			model.SetTextureMap(pTexture);
+			model.SetPalette(pPalette);
+			model.SetTextureMapWidth(header.skinWidth);
+		}
+	}
 
 	// Polygon array initialization
 	for (int i = 0; i < header.numTriangles; ++i)
@@ -121,7 +175,10 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model)
 		// Index 2:  triangles[i].vertexIndex[2]
 
 		// Create a new Polygon3D with the 3 vertex indexes that make up the polygon
-		Polygon3D modelPoly(triangles[i].vertexIndex[0], triangles[i].vertexIndex[1], triangles[i].vertexIndex[2]);
+		// Updated to store texture UV co-ordinates also
+		Polygon3D modelPoly(triangles[i].vertexIndex[0], triangles[i].vertexIndex[1], triangles[i].vertexIndex[2],
+			triangles[i].uvIndex[0], triangles[i].uvIndex[1], triangles[i].uvIndex[2]);
+
 		model.AddPolygon(modelPoly);
 	}
 
@@ -150,6 +207,16 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model)
 		model.AddVertex(modelVert);
 	}
 
+	// Texture coordinate initialization
+	if (bHasTexture)
+	{
+		for (int i = 0; i < header.numTexCoords; i++)
+		{
+			Texture texture(texCoords[i].texCoord[0], texCoords[i].texCoord[1]);
+			model.AddTexture(texture);
+		}
+	}
+
 	// Free dynamically allocated memory
 	delete[] triangles; // NOTE: this is 'array' delete. Must be sure to use this
 	triangles = 0;
@@ -158,5 +225,118 @@ bool MD2Loader::LoadModel(const char* filename, Model3D& model)
 	frameBuffer = 0;
 	frame = 0;
 
+	delete[] texCoords;
+	texCoords = 0;
+
 	return true;
+}
+
+// ----------------------------------------------
+// LoadPCX() - load pcx texture from file.
+//
+// assume the caller has allocated enough memory for texture - md2Header->skinWidth * md2Header->skinHeight
+// ----------------------------------------------
+bool MD2Loader::LoadPCX(const char* filename, BYTE* texture, SDL_Color* palette, const Md2Header* md2Header)
+{
+	std::ifstream   file;   // file stream
+
+	// try to open filename
+	file.open(filename, std::ios::in | std::ios::binary);
+
+	if (file.fail())
+		return false;
+
+	// read md2 header file
+	PcxHeader header;
+	file.read(reinterpret_cast<char*>(&header), sizeof(PcxHeader));
+
+	/////////////////////////////////////////////
+	//      verify that this is a valid PCX file
+
+	// only handle those with 256 colour palette
+	if ((header.Version != 5) || (header.BitsPerPixel != 8) ||
+		(header.Encoding != 1) || (header.NumPlanes != 1) ||
+		(md2Header && (header.BytesPerLine != md2Header->skinWidth)))
+	{
+		// this is not valid supported PCX
+		file.close();
+		return false;
+	}
+
+	/////////////////////////////////////////////
+	//		check dimensions
+
+	int XSize = header.XMax - header.XMin + 1;
+	int YSize = header.YMax - header.YMin + 1;
+	int Size = XSize * YSize;
+
+	// check matches our MD2 expected texture
+	// note. valid size is <= because uses RLE (so potentially smaller)
+	if (md2Header && (Size > (md2Header->skinHeight * md2Header->skinWidth)))
+	{
+		// doesn't match expected MD2 skin size
+		file.close();
+		return false;
+	}
+
+	/////////////////////////////////////////////
+	//          reading file data
+
+	BYTE processByte, colourByte;
+	int count = 0;
+	while (count < Size)
+	{
+		file.read(reinterpret_cast<char*>(&processByte), 1);
+
+		// Run length encoding - test if byte is an RLE byte
+		if ((processByte & 192) == 192)
+		{
+			// extract number of times repeated byte
+			processByte &= 63;
+			file.read(reinterpret_cast<char*>(&colourByte), 1);
+			for (int index = 0; index < processByte; ++index)
+			{
+				// repeatedly write colour 
+				texture[count] = colourByte;
+				++count;
+			}
+		}
+		else
+		{
+			// process byte is the colour
+			texture[count] = processByte;
+			++count;
+		}
+	}
+
+	bool returnValue = false;
+
+	// read palette data...
+	file.seekg(-769, std::ios::end);	// from this offset from end of file
+	file.read(reinterpret_cast<char*>(&processByte), 1);
+	if (processByte == 12)
+	{
+		BYTE rawPalette[768];
+		file.read(reinterpret_cast<char*>(&rawPalette), 768);
+
+		// build palette
+		for (int palIndex = 0; palIndex < 256; ++palIndex)
+		{
+			/*palette[palIndex].SetFromCOLORREF(RGB(rawPalette[palIndex * 3],
+				rawPalette[(palIndex * 3) + 1],
+				rawPalette[(palIndex * 3) + 2]));*/
+
+			// modified to use SDL_Color instead of GDI::Color
+			palette[palIndex] = SDL_Color{ rawPalette[palIndex * 3],
+										   rawPalette[(palIndex * 3) + 1],
+										   rawPalette[(palIndex * 3) + 2],
+										   255 };
+		}
+
+		returnValue = true;
+	}
+
+	// all done
+	file.close();
+	return returnValue;
 }
