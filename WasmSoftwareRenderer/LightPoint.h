@@ -12,10 +12,13 @@ public:
 	~LightPoint(void);
 
 	Vertex GetLightPosition() const;
-	float GetAttenuationA() const;
-	float GetAttenuationB() const;
-	float GetAttenuationC() const;
 	void SetLightPosition(const Vertex& pos);
+	float GetAttenuationA() const;
+	void SetAttenuationA(const float attA);
+	float GetAttenuationB() const;
+	void SetAttenuationB(const float attB);
+	float GetAttenuationC() const;
+	void SetAttenuationC(const float attC);
 	bool GetLightSwitch(void) const;
 	void SetLightSwitch(bool switchState);
 

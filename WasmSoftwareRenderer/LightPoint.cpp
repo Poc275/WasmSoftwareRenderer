@@ -37,9 +37,19 @@ Vertex LightPoint::GetLightPosition() const
 	return _position;
 }
 
+void LightPoint::SetLightPosition(const Vertex& pos)
+{
+	_position = pos;
+}
+
 float LightPoint::GetAttenuationA() const
 {
 	return _attenuationA;
+}
+
+void LightPoint::SetAttenuationA(const float attA)
+{
+	_attenuationA = attA;
 }
 
 float LightPoint::GetAttenuationB() const
@@ -47,14 +57,19 @@ float LightPoint::GetAttenuationB() const
 	return _attenuationB;
 }
 
+void LightPoint::SetAttenuationB(const float attB)
+{
+	_attenuationB = attB;
+}
+
 float LightPoint::GetAttenuationC() const
 {
 	return _attenuationC;
 }
 
-void LightPoint::SetLightPosition(const Vertex& pos)
+void LightPoint::SetAttenuationC(const float attC)
 {
-	_position = pos;
+	_attenuationC = attC;
 }
 
 bool LightPoint::GetLightSwitch(void) const

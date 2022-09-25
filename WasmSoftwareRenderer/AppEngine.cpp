@@ -47,12 +47,110 @@ SDL_Renderer* renderer;
 Model3D cube = Model3D();
 Model3D marvin = Model3D();
 Camera cammy = Camera();
-float rot = 0;
+bool rotateModel = true;
+float speed = 0.001;
+float marvinX = 0;
+float marvinY = 0;
+float marvinZ = 0;
+float marvinRotateX = 0;
+float marvinRotateY = 0;
+float marvinRotateZ = 0;
 
 // LIGHTS
-LightAmbient ambientLight = LightAmbient(0.0f, 188.0f, 188.0f, 0.2f, 0.2f, 0.2f);
+LightAmbient ambientLight = LightAmbient(0, 188.0f, 188.0f, 0.2f, 0.2f, 0.2f);
 vector<LightDirectional> directionalLights;
 vector<LightPoint> pointLights;
+bool directionalLightingOn = true;
+
+// exported functions for JS -> C++ comms
+// extern "C" prevents name mangling so you can call the same method names from JS
+extern "C" {
+	void set_ambient_light_colour(float r, float g, float b)
+	{
+		ambientLight.SetRedIntensity(r);
+		ambientLight.SetGreenIntensity(g);
+		ambientLight.SetBlueIntensity(b);
+	}
+
+	void set_ambient_light_reflection(float arr, float arg, float arb)
+	{
+		ambientLight.SetAmbientReflectionRed(arr);
+		ambientLight.SetAmbientReflectionGreen(arg);
+		ambientLight.SetAmbientReflectionBlue(arb);
+	}
+
+	void switch_directional_lighting()
+	{
+		directionalLightingOn = !directionalLightingOn;
+	}
+
+	void set_direction_light_colour(float r, float g, float b)
+	{
+		directionalLights.at(0).SetRedIntensity(r);
+		directionalLights.at(0).SetGreenIntensity(g);
+		directionalLights.at(0).SetBlueIntensity(b);
+	}
+
+	void set_direction_light_position(float x, float y, float z)
+	{
+		directionalLights.at(0).SetDirectionToLightSource(Vector3D(x, y, z));
+	}
+
+	void switch_point_light(bool status)
+	{
+		pointLights.at(0).SetLightSwitch(status);
+	}
+
+	void set_point_light_colour(float r, float g, float b)
+	{
+		pointLights.at(0).SetRedIntensity(r);
+		pointLights.at(0).SetGreenIntensity(g);
+		pointLights.at(0).SetBlueIntensity(b);
+	}
+
+	void set_point_light_position(float x, float y, float z)
+	{
+		pointLights.at(0).SetLightPosition(Vertex(x, y, z, 0));
+	}
+
+	void set_point_light_attenuation(float a, float b, float c)
+	{
+		pointLights.at(0).SetAttenuationA(a);
+		pointLights.at(0).SetAttenuationB(b);
+		pointLights.at(0).SetAttenuationC(c);
+	}
+
+	void translate_model(float x, float y, float z)
+	{
+		marvinX = x;
+		marvinY = y;
+		marvinZ = z;
+	}
+
+	void rotate_model(float x, float y, float z)
+	{
+		marvinRotateX = x;
+		marvinRotateY = y;
+		marvinRotateZ = z;
+	}
+
+	void auto_rotate_model()
+	{
+		rotateModel = !rotateModel;
+	}
+
+	void set_auto_rotate_speed(float rotate_speed)
+	{
+		speed = rotate_speed;
+	}
+
+	void set_model_diffuse_colour(float r, float g, float b)
+	{
+		marvin.SetDiffuseRed(r);
+		marvin.SetDiffuseGreen(g);
+		marvin.SetDiffuseBlue(b);
+	}
+}
 
 void DrawWireFrame(const Model3D& model)
 {
@@ -616,14 +714,17 @@ bool handle_events()
 		return false;
 	}
 
-	// rotate model test
-	rot += 0.001f;
+	if (rotateModel)
+	{
+		marvinRotateY += speed;
+	}
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x80, 0x00, 0xFF);
 
-	marvin.SetWorldRotations(Vector3D(0, rot, 0));
+	marvin.SetWorldTranslations(Vector3D(marvinX, marvinY, marvinZ));
+	marvin.SetWorldRotations(Vector3D(marvinRotateX, marvinRotateY, marvinRotateZ));
 
 	marvin.ApplyTransformToLocalVertices(Matrix3D::RotateModel(marvin.GetWorldRotations()));
 	marvin.ApplyTransformToTransformedVertices(Matrix3D::TranslateModel(marvin.GetWorldTranslations()));
@@ -639,9 +740,12 @@ bool handle_events()
 	marvin.CalculateLightingAmbient(ambientLight);
 	//marvin.CalculateLightingDirectional(directionalLights);
 	//marvin.CalculateLightingPoint(pointLights);
-	
+
 	// lighting for Gouraud shading (ambient doesn't rely on normals, is just "flat" shading)
-	marvin.CalculateLightingDirectionalGouraud(directionalLights);
+	if (directionalLightingOn)
+	{
+		marvin.CalculateLightingDirectionalGouraud(directionalLights);
+	}
 	marvin.CalculateLightingPointGouraud(pointLights);
 
 	marvin.ApplyTransformToTransformedVertices(cammy.GetViewpointTransformation());
@@ -670,7 +774,6 @@ void run_main_loop()
 #else
 	while (handle_events())
 		;
-	
 #endif // __EMSCRIPTEN__
 }
 
